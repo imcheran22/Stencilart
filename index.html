@@ -2,296 +2,713 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f5f4ef" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Daily Log">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232f6f5e'/%3E%3Cpath d='M18 33l9 9 19-20' fill='none' stroke='white' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <title>Daily Log</title>
 <style>
-:root{--bg:#f6f5f1;--card:#fff;--ink:#1d1d1b;--mute:#6b6b66;--line:#e4e2da;--accent:#2f6f5e;--accent-ink:#fff;--warn:#b4572b}
-@media (prefers-color-scheme:dark){:root{--bg:#141413;--card:#1e1e1c;--ink:#ecebe6;--mute:#9a9992;--line:#34332f;--accent:#5fb89f;--accent-ink:#0f1b17;--warn:#e08a5c}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-.wrap{max-width:760px;margin:0 auto;padding:16px}
-h1{font-size:1.4rem;margin:8px 0 12px}
-h2{font-size:1rem;margin:0 0 10px;color:var(--accent)}
-.tabs{display:flex;gap:8px;margin-bottom:12px}
-.tabs button,.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 14px;border-radius:10px;font:inherit;cursor:pointer}
-.tabs button.on,.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
-label{display:block;font-size:.8rem;color:var(--mute);margin-bottom:3px}
-input,select,textarea{width:100%;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
-textarea{min-height:64px;resize:vertical}
-.rate{display:flex;gap:6px}
-.rate button{flex:1;padding:9px 0;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit;cursor:pointer}
-.rate button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.hint{font-size:.78rem;color:var(--mute);margin-top:4px}
-.score{font-size:1.8rem;font-weight:700}
-.stat{padding:10px;border:1px solid var(--line);border-radius:10px}
-.stat b{display:block;font-size:1.3rem}
-.stat span{font-size:.78rem;color:var(--mute)}
-table{width:100%;border-collapse:collapse;font-size:.82rem}
-th,td{padding:6px 4px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
-.scroll{overflow-x:auto}
-svg{width:100%;height:auto;display:block}
-.saved{color:var(--accent);font-size:.85rem;min-height:1.2em}
+:root{
+  --bg:#f5f4ef;--card:#ffffff;--card2:#f8f7f3;--ink:#1d1d1b;--ink2:#4a4a46;--mute:#74736d;--line:#e6e4dc;
+  --accent:#2f6f5e;--accent-soft:#e2eee8;--on-accent:#ffffff;--warn:#a5481d;--warn-soft:#fbeee6;
+  --shadow:0 1px 2px rgba(20,20,10,.04),0 4px 14px rgba(20,20,10,.05);
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#121211;--card:#1c1c1a;--card2:#242422;--ink:#eeede8;--ink2:#cac9c2;--mute:#9a9992;--line:#34332f;
+  --accent:#62bba2;--accent-soft:#1d3530;--on-accent:#0c1a16;--warn:#ec9a68;--warn-soft:#3a2418;
+  --shadow:none;
+}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+button{font:inherit;color:inherit;cursor:pointer}
+input,textarea{font:inherit;color:var(--ink)}
+.wrap{max-width:680px;margin:0 auto;padding:0 16px}
+h1,h2,h3{margin:0;line-height:1.25}
+
+/* header */
+.top{position:sticky;top:0;z-index:5;background:color-mix(in oklab,var(--bg) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:12px 0 10px;margin:0 -16px 6px;padding-left:16px;padding-right:16px;border-bottom:1px solid var(--line)}
+.top-row{display:flex;align-items:center;gap:10px}
+.top-row .when{flex:1;min-width:0}
+.when h1{font-size:1.3rem;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.when .rel{font-size:.82rem;color:var(--mute)}
+.icon-btn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;font-size:1.2rem;line-height:1;flex:none}
+.icon-btn:disabled{opacity:.35;cursor:default}
+.ring{width:46px;height:46px;flex:none;position:relative}
+.ring svg{width:46px;height:46px;transform:rotate(-90deg)}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:.72rem}
+.ring .trk{fill:none;stroke:var(--line);stroke-width:5}
+.ring .val{fill:none;stroke:var(--accent);stroke-width:5;stroke-linecap:round;transition:stroke-dasharray .3s}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:10px}
+.wd{border:0;background:none;padding:4px 0;border-radius:10px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.7rem;color:var(--mute)}
+.wd:disabled{opacity:.35;cursor:default}
+.wd .n{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:.85rem;color:var(--ink);background:conic-gradient(var(--accent) calc(var(--p)*1%),var(--line) 0);position:relative}
+.wd .n::before{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--bg)}
+.wd .n span{position:relative}
+.wd.sel .n::before{background:var(--accent)}
+.wd.sel .n span{color:var(--on-accent);font-weight:600}
+.wd.today{color:var(--accent);font-weight:600}
+.jump{border:0;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:4px 10px;font-size:.78rem;font-weight:600;margin-left:6px}
+
+/* cards & fields */
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0;box-shadow:var(--shadow)}
+.card-h{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}
+.card-h h2{font-size:1.05rem}
+.card-h .sub{margin:2px 0 0;font-size:.8rem;color:var(--mute)}
+.pill{font-size:.75rem;padding:3px 9px;border-radius:999px;background:var(--card2);border:1px solid var(--line);color:var(--mute);white-space:nowrap;flex:none}
+.pill.full{background:var(--accent-soft);border-color:transparent;color:var(--accent);font-weight:600}
+.f{margin-top:14px}
+.f:first-of-type{margin-top:0}
+.lbl{font-size:.82rem;color:var(--ink2);margin-bottom:6px;font-weight:500}
+.hint{font-size:.78rem;color:var(--mute);margin:6px 0 0}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.two>*{min-width:0}
+.two .f{margin-top:0}
+.two+.f,.f+.two{margin-top:14px}
+input[type=text],input[type=number],input[type=time],input:not([type]),textarea{width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card2);outline:none}
+input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+textarea{min-height:76px;resize:vertical}
+.tf{display:flex;gap:6px}
+.tf input{flex:1;min-width:0}
+.two .tf{flex-direction:column}
+.two .tf .now{min-height:34px}
+.now{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:0 10px;font-size:.8rem;color:var(--accent);font-weight:600;flex:none}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{min-height:38px;padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:var(--card2);font-size:.88rem}
+.chip.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
+.chips.sm .chip{min-height:32px;padding:4px 10px;font-size:.8rem}
+.chip.add{border-style:dashed;color:var(--ink2)}
+.scale{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.scale button{border:1px solid var(--line);background:var(--card2);border-radius:12px;padding:7px 2px;display:flex;flex-direction:column;align-items:center;gap:1px;min-height:52px}
+.scale b{font-size:1rem}
+.scale span{font-size:.66rem;color:var(--mute);line-height:1.15;text-align:center}
+.scale button.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.scale button.on span{color:var(--on-accent);opacity:.9}
+.step{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:12px;background:var(--card2);overflow:hidden;min-height:44px}
+.step button{border:0;background:none;width:46px;font-size:1.3rem;color:var(--accent);flex:none}
+.step button:active{background:var(--accent-soft)}
+.sv{flex:1;display:grid;place-items:center;font-weight:600;font-size:.92rem;text-align:center;padding:0 4px}
+.sv.empty{color:var(--mute);font-weight:400}
+.summary{margin-top:14px;padding:12px;border-radius:14px;background:var(--accent-soft);display:flex;gap:14px;align-items:center}
+.summary.plain{background:var(--card2)}
+.summary .big{font-size:2rem;font-weight:700;color:var(--accent);line-height:1}
+.summary .big small{font-size:.8rem;color:var(--mute);font-weight:500}
+.summary .k{font-weight:600}
+.warn{margin-top:8px;padding:8px 10px;border-radius:10px;background:var(--warn-soft);color:var(--warn);font-size:.82rem}
+
+/* meals */
+.meal{border:1px solid var(--line);border-radius:14px;margin-top:8px;background:var(--card2)}
+.meal summary{list-style:none;display:flex;align-items:center;gap:10px;padding:12px;cursor:pointer}
+.meal summary::-webkit-details-marker{display:none}
+.meal summary .mn{font-weight:600;min-width:0;flex:1}
+.meal summary .mp{display:block;font-weight:400;font-size:.8rem;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meal summary .mt{font-size:.8rem;color:var(--mute)}
+.meal summary .dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--line);flex:none}
+.meal.has summary .dot{background:var(--accent);border-color:var(--accent)}
+.meal summary .chev{color:var(--mute);transition:transform .2s}
+.meal[open] summary .chev{transform:rotate(90deg)}
+.meal .body{padding:0 12px 12px}
+.meal .body>*+*{margin-top:10px}
+.linkbtn{border:0;background:none;color:var(--accent);font-weight:600;font-size:.82rem;padding:4px 0}
+
+/* habits */
+.hab{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1px solid var(--line);background:var(--card2);border-radius:12px;padding:11px 12px;margin-top:8px}
+.hab .box{width:22px;height:22px;border-radius:7px;border:2px solid var(--line);display:grid;place-items:center;flex:none;font-size:.8rem;color:transparent}
+.hab.on{border-color:var(--accent);background:var(--accent-soft)}
+.hab.on .box{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+
+/* bottom nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--card);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom));display:flex;justify-content:center}
+.nav-in{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;width:100%;max-width:480px}
+.nav button{border:0;background:none;border-radius:12px;padding:6px 0;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.72rem;color:var(--mute)}
+.nav button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nav button.on{color:var(--accent);font-weight:600}
+.toast{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(10px);opacity:0;background:var(--ink);color:var(--bg);padding:6px 14px;border-radius:999px;font-size:.8rem;pointer-events:none;transition:.2s;z-index:7}
+.toast.show{opacity:1;transform:translateX(-50%)}
+
+/* insights */
+.mnav{display:flex;align-items:center;gap:10px;padding:10px 12px}
+.mnav h2{flex:1;text-align:center;font-size:1.05rem}
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+@media(min-width:560px){.tiles{grid-template-columns:repeat(3,1fr)}}
+.tile{border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:var(--card2)}
+.tile .tl{font-size:.75rem;color:var(--mute);display:block}
+.tile b{display:block;font-size:1.25rem;margin:2px 0;letter-spacing:-.01em}
+.tile .td{font-size:.72rem;color:var(--ink2)}
+.card h3{font-size:.98rem}
+.cap{font-size:.78rem;color:var(--mute);margin:2px 0 10px}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .ax{font-size:11px;fill:var(--mute)}
+.chart .band{fill:var(--accent-soft)}
+.chart .ref{stroke:var(--mute);stroke-width:1;stroke-dasharray:4 4}
+.chart .ln{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.chart .dot{fill:var(--accent);stroke:var(--card);stroke-width:2}
+.chart .hit{fill:transparent;cursor:pointer}
+.chart .hit:hover+.dot,.chart .hit:focus+.dot{r:6}
+.hm{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.hm .hd{font-size:.7rem;color:var(--mute);text-align:center}
+.hc{aspect-ratio:1;border-radius:8px;display:grid;place-items:center;font-size:.78rem;border:0;padding:0;background:color-mix(in oklab,var(--accent) var(--lv),var(--card2));color:var(--ink)}
+.hc.dk{color:var(--on-accent);font-weight:600}
+.hc.none{background:transparent;border:1px dashed var(--line);color:var(--mute)}
+.hc.blank{visibility:hidden}
+.legend{display:flex;align-items:center;gap:4px;font-size:.72rem;color:var(--mute);margin-top:8px;justify-content:flex-end}
+.legend i{width:14px;height:14px;border-radius:4px;background:color-mix(in oklab,var(--accent) var(--lv),var(--card2))}
+.hb{display:grid;grid-template-columns:minmax(0,1.3fr) 2fr 44px;gap:10px;align-items:center;margin-top:10px;font-size:.85rem}
+.hb span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar{height:10px;border-radius:999px;background:var(--card2);border:1px solid var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:999px}
+.hb b{text-align:right;font-size:.82rem}
+.ins{margin:0;padding:0;list-style:none}
+.ins li{padding:10px 0;border-top:1px solid var(--line);font-size:.9rem}
+.ins li:first-child{border-top:0;padding-top:0}
+.scroll{overflow-x:auto;margin:0 -16px;padding:0 16px}
+table{border-collapse:collapse;font-size:.8rem;width:100%}
+th,td{padding:8px 6px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--mute);font-weight:500}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--card2)}
+.empty{text-align:center;color:var(--mute);padding:28px 12px}
+#tip{position:fixed;z-index:9;background:var(--ink);color:var(--bg);padding:6px 10px;border-radius:8px;font-size:.78rem;pointer-events:none;white-space:pre-line;max-width:240px}
+
+/* settings */
+.hrow{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
+.hrow:first-child{border-top:0}
+.hrow span{flex:1}
+.hrow .icon-btn{width:34px;height:34px;font-size:.9rem}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{min-height:42px;padding:8px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card2);font-weight:500}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.danger{color:var(--warn)}
+.prose p{margin:6px 0;font-size:.88rem;color:var(--ink2)}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Daily Log</h1>
-  <div class="tabs">
-    <button id="tab-day" class="on">Today</button>
-    <button id="tab-month">Month</button>
-  </div>
-
-  <section id="view-day">
-    <div class="card row">
-      <button class="btn" id="prev">‹</button>
-      <input type="date" id="date" style="flex:1;min-width:150px">
-      <button class="btn" id="next">›</button>
-      <span class="saved" id="saved"></span>
-    </div>
-
-    <div class="card">
-      <h2>Sleep</h2>
-      <div class="grid">
-        <div><label>Bedtime (last night)</label><input type="time" id="bed"></div>
-        <div><label>Woke up</label><input type="time" id="wake"></div>
-        <div><label>Minutes to fall asleep</label><input type="number" id="latency" min="0" inputmode="numeric"></div>
-        <div><label>Night wake-ups</label><input type="number" id="wakeups" min="0" inputmode="numeric"></div>
-        <div><label>Dreams</label>
-          <select id="dreams"><option value="">–</option><option>None</option><option>Light</option><option>Vivid</option><option>Nightmare</option></select></div>
+  <section id="view-log">
+    <div class="top">
+      <div class="top-row">
+        <button class="icon-btn" id="prev" aria-label="Previous day">‹</button>
+        <div class="when"><h1 id="dayTitle"></h1><div class="rel" id="dayRel"></div></div>
+        <button class="icon-btn" id="next" aria-label="Next day">›</button>
+        <div class="ring" title="How much of today is logged">
+          <svg viewBox="0 0 46 46"><circle class="trk" cx="23" cy="23" r="19"/><circle class="val" id="ringVal" cx="23" cy="23" r="19" stroke-dasharray="0 200"/></svg>
+          <b id="ringTxt">0%</b>
+        </div>
       </div>
-      <div style="margin-top:10px"><label>How did you feel on waking? (1 exhausted – 5 fresh)</label><div class="rate" data-k="wakeFeel"></div></div>
-      <div class="row" style="margin-top:10px">
-        <div><div class="score" id="sleepScore">–</div><div class="hint" id="sleepDetail">Fill bedtime &amp; wake time</div></div>
-      </div>
-      <div class="hint">Sleep score (0–100) = 40% duration (7–9h ideal) + 20% fall-asleep time + 15% night wake-ups + 25% how you felt. Same formula every day, so the monthly trend is comparable.</div>
+      <div class="week" id="week"></div>
     </div>
-
-    <div class="card">
-      <h2>Food &amp; water</h2>
-      <div class="grid" id="meals"></div>
-      <div class="grid" style="margin-top:10px">
-        <div><label>Water (glasses, excl. coconut water)</label><input type="number" id="water" min="0" step="0.5" inputmode="decimal"></div>
-        <div><label>Junk / sugar items</label><input type="number" id="junk" min="0" inputmode="numeric"></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Energy &amp; mood (1 low – 5 high)</h2>
-      <div style="margin-bottom:8px"><label>Morning energy</label><div class="rate" data-k="enM"></div></div>
-      <div style="margin-bottom:8px"><label>Afternoon energy</label><div class="rate" data-k="enA"></div></div>
-      <div style="margin-bottom:8px"><label>Evening energy</label><div class="rate" data-k="enE"></div></div>
-      <div><label>Overall mood</label><div class="rate" data-k="mood"></div></div>
-    </div>
-
-    <div class="card">
-      <h2>Body &amp; movement</h2>
-      <div class="grid">
-        <div><label>Exercise (minutes)</label><input type="number" id="exercise" min="0" inputmode="numeric"></div>
-        <div><label>Steps</label><input type="number" id="steps" min="0" inputmode="numeric"></div>
-        <div><label>Weight (kg, optional)</label><input type="number" id="weight" step="0.1" inputmode="decimal"></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Screen time (fill at night)</h2>
-      <div class="grid">
-        <div><label>Hours</label><input type="number" id="scrH" min="0" max="24" inputmode="numeric"></div>
-        <div><label>Minutes</label><input type="number" id="scrM" min="0" max="59" inputmode="numeric"></div>
-        <div><label>Phone pickups</label><input type="number" id="pickups" min="0" inputmode="numeric"></div>
-        <div><label>Last screen before bed</label><input type="time" id="lastScreen"></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Notes</h2>
-      <textarea id="notes" placeholder="Anything notable: stress, headache, good habit, win of the day…"></textarea>
-    </div>
+    <div id="log"></div>
   </section>
-
-  <section id="view-month" hidden>
-    <div class="card row">
-      <button class="btn" id="mprev">‹</button>
-      <input type="month" id="month" style="flex:1;min-width:150px">
-      <button class="btn" id="mnext">›</button>
-    </div>
-    <div class="card"><h2>Month summary</h2><div class="grid" id="stats"></div><div class="hint" id="logged"></div></div>
-    <div class="card"><h2>Sleep hours</h2><div id="ch-sleep"></div></div>
-    <div class="card"><h2>Sleep score</h2><div id="ch-score"></div></div>
-    <div class="card"><h2>Screen time (hours)</h2><div id="ch-screen"></div></div>
-    <div class="card"><h2>Energy (avg of day)</h2><div id="ch-energy"></div></div>
-    <div class="card"><h2>Days</h2><div class="scroll"><table id="tbl"></table></div></div>
-    <div class="card row">
-      <button class="btn" id="csv">Export CSV</button>
-      <button class="btn" id="json">Backup JSON</button>
-      <label class="btn" style="margin:0">Restore JSON<input type="file" id="restore" accept="application/json" hidden></label>
-    </div>
-    <div class="hint">Data is saved in this browser only. Use Backup JSON now and then (or before changing phone/browser).</div>
-  </section>
+  <section id="view-insights" hidden></section>
+  <section id="view-settings" hidden></section>
 </div>
 
+<nav class="nav"><div class="nav-in">
+  <button id="nav-log" class="on"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h10"/></svg>Log</button>
+  <button id="nav-insights"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Insights</button>
+  <button id="nav-settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</button>
+</div></nav>
+<div class="toast" id="toast">Saved</div>
+<div id="tip" hidden></div>
+
 <script>
-const KEY='dailylog.v1';
-const $=id=>document.getElementById(id);
-const MEALS=[['breakfast','Breakfast'],['snack','Snack'],['lunch','Lunch'],['snack2','Evening snack'],['dinner','Dinner']];
-const TEXT=['bed','wake','latency','wakeups','dreams','water','junk','exercise','steps','weight','scrH','scrM','pickups','lastScreen','notes'];
+/* ---------- storage ---------- */
+const KEY='dailylog.v1', SKEY='dailylog.settings.v1';
+const read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}};
+const write=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+let db=read(KEY,{});
+const DEFAULT_HABITS=['In bed by bedtime goal','No screens 30 min before bed','Walk / exercise 30 min','8 glasses of water','No junk food'];
+let S=Object.assign({habits:DEFAULT_HABITS.slice(),sleepTarget:8,bedTarget:'23:00',glassMl:250},read(SKEY,{}));
+const persist=()=>write(KEY,db), saveS=()=>write(SKEY,S);
 
-let db={};
-try{db=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){db={}}
-const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}};
-const iso=d=>{const z=new Date(d.getTime()-d.getTimezoneOffset()*6e4);return z.toISOString().slice(0,10)};
+/* ---------- utils ---------- */
+const $=s=>document.querySelector(s);
+function h(tag,a,...kids){const el=document.createElement(tag);for(const[k,v]of Object.entries(a||{})){if(v==null||v===false)continue;if(k==='class')el.className=v;else if(k.startsWith('on'))el.addEventListener(k.slice(2),v);else el.setAttribute(k,v===true?'':v)}for(const c of kids.flat()){if(c==null||c===false)continue;el.append(c.nodeType?c:document.createTextNode(c))}return el}
+const iso=d=>new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const addDays=(k,n)=>{const d=new Date(k+'T12:00');d.setDate(d.getDate()+n);return iso(d)};
 const today=iso(new Date());
+const has=(e,k)=>{if(k==='scr')return has(e,'scrH')||has(e,'scrM');const v=e[k];return v!=null&&v!==''&&!(Array.isArray(v)&&!v.length)};
+const num=v=>v==null||v===''||isNaN(+v)?null:+v;
+const avg=a=>{a=a.filter(x=>x!=null&&!isNaN(x));return a.length?a.reduce((x,y)=>x+y,0)/a.length:null};
+const sd=a=>{a=a.filter(x=>x!=null);if(a.length<2)return null;const m=avg(a);return Math.sqrt(avg(a.map(x=>(x-m)**2)))};
+const mins=t=>{if(!t)return null;const[h,m]=String(t).split(':').map(Number);return isNaN(h)?null:h*60+(m||0)};
+const pad=n=>String(n).padStart(2,'0');
+const clock=m=>{m=((Math.round(m)%1440)+1440)%1440;return pad(Math.floor(m/60))+':'+pad(m%60)};
+const fmtDur=m=>{if(m==null)return '–';m=Math.round(m);const hh=Math.floor(m/60),mm=m%60;return hh?hh+'h'+(mm?' '+pad(mm)+'m':''):mm+'m'};
+const nowHM=()=>{const d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())};
+const dayLabel=k=>new Date(k+'T12:00').toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'});
 
-// Seed today's entry from what was shared on day one
+/* ---------- metrics ---------- */
+function sleepMins(e){const b=mins(e.bed),w=mins(e.wake);if(b==null||w==null)return null;let d=w-b;if(d<=0)d+=1440;return d}
+function sleepScore(e){
+  const d=sleepMins(e);if(d==null)return null;const hrs=d/60;
+  const dur=hrs>=7&&hrs<=9?100:hrs<7?Math.max(0,100-(7-hrs)*25):Math.max(0,100-(hrs-9)*25);
+  const parts=[[40,dur]];
+  if(num(e.latency)!=null)parts.push([20,Math.max(0,100-Math.max(0,num(e.latency)-15)*3)]);
+  if(num(e.wakeups)!=null)parts.push([15,Math.max(0,100-num(e.wakeups)*35)]);
+  if(num(e.wakeFeel)!=null)parts.push([25,(num(e.wakeFeel)-1)*25]);
+  const tw=parts.reduce((a,p)=>a+p[0],0);
+  return Math.round(parts.reduce((a,p)=>a+p[0]*p[1],0)/tw);
+}
+const bedAbs=e=>{const m=mins(e&&e.bed);return m==null?null:m<720?m+1440:m};
+const screenMin=e=>has(e,'scr')?(num(e.scrH)||0)*60+(num(e.scrM)||0):null;
+const energy=e=>avg([e.enM,e.enA,e.enE].map(num));
+function screenGap(k){ // minutes between last screen on day k and bedtime that night (logged in next day's entry)
+  const e=db[k]||{},n=db[addDays(k,1)]||{};const l=mins(e.lastScreen),b=mins(n.bed);
+  if(l==null||b==null)return null;const g=(b-l+1440)%1440;return g>720?0:g;
+}
+function completion(e){
+  let f=0,t=0;SECTIONS.forEach(s=>{if(!s.core)return;t+=s.core.length;f+=s.core.filter(k=>has(e,k)).length});
+  return t?Math.round(f/t*100):0;
+}
+
+/* ---------- schema ---------- */
+const SECTIONS=[
+  {id:'sleep',t:'Sleep',sub:'Fill in after you wake up',core:['bed','wake','latency','wakeups','wakeFeel']},
+  {id:'food',t:'Food & drink',sub:'Log each meal as you eat',core:['breakfast_i','lunch_i','dinner_i','water']},
+  {id:'mind',t:'Energy & mood',sub:'Quick taps through the day',core:['enM','enA','enE','mood','stress']},
+  {id:'body',t:'Movement & body',core:['exercise','steps','digestion']},
+  {id:'screen',t:'Screen time',sub:'Fill at night from your phone’s screen-time page',core:['scr','pickups','lastScreen']},
+  {id:'habits',t:'Habits'},
+  {id:'reflect',t:'Reflection',core:['win']},
+];
+const MEALS=[['breakfast','Breakfast','07:30'],['snack','Morning snack','10:00'],['lunch','Lunch','13:30'],['snack2','Evening snack','17:00'],['dinner','Dinner','20:30']];
+const FOOD_TAGS=['Protein','Veg / fruit','Home-cooked','Outside food','Fried','Sweet'];
+
+/* ---------- seed (first ever visit) ---------- */
 if(!Object.keys(db).length){
-  db[today]={bed:'23:30',wake:'06:45',dreams:'Light',
-    breakfast_t:'07:15',breakfast_i:'3 roti, tomato/onion dry gravy, 2 boiled eggs, coconut milk 1 glass, coconut water ¾ glass',
+  db['2026-10-15']={bed:'23:30',wake:'06:45',dreams:'Light',
+    breakfast_t:'07:15',breakfast_i:'3 roti, tomato/onion dry gravy, 2 boiled eggs, coconut milk 1 glass, coconut water ¾ glass',breakfast_tags:['Protein','Home-cooked'],
     snack_t:'10:00',snack_i:'Sweet corn ½',
-    lunch_t:'13:30',lunch_i:'3 roti with same gravy, 2 boiled eggs',
+    lunch_t:'13:30',lunch_i:'3 roti, tomato/onion dry gravy, 2 boiled eggs',lunch_tags:['Protein','Home-cooked'],
     notes:'Woke up active, slightly tired.'};
   persist();
 }
 
-let cur=today;
-const entry=()=>db[cur]||(db[cur]={});
-
-// build meal inputs
-$('meals').innerHTML=MEALS.map(([k,n])=>`<div style="grid-column:1/-1"><label>${n}</label><div class="row"><input type="time" id="${k}_t" style="width:120px"><input type="text" id="${k}_i" placeholder="What did you eat?" style="flex:1;min-width:160px"></div></div>`).join('');
-const FIELDS=[...TEXT,...MEALS.flatMap(([k])=>[k+'_t',k+'_i'])];
-
-// rating buttons
-document.querySelectorAll('.rate').forEach(r=>{
-  for(let i=1;i<=5;i++){const b=document.createElement('button');b.textContent=i;b.dataset.v=i;
-    b.onclick=()=>{const e=entry();e[r.dataset.k]=e[r.dataset.k]==i?'':i;save();paintRates()};r.appendChild(b)}
-});
-function paintRates(){
-  const e=db[cur]||{};
-  document.querySelectorAll('.rate').forEach(r=>[...r.children].forEach(b=>b.classList.toggle('on',e[r.dataset.k]==b.dataset.v)));
-}
-
-function load(){
-  const e=db[cur]||{};
-  $('date').value=cur;
-  FIELDS.forEach(k=>$(k).value=e[k]??'');
-  paintRates();paintSleep();
-}
-function save(){
-  const e=entry();
-  FIELDS.forEach(k=>{const v=$(k).value;if(v===''){delete e[k]}else e[k]=v});
+/* ---------- state ---------- */
+let cur=today, view='log', mo=today.slice(0,7), heat='score';
+const E=()=>db[cur]||{};
+let toastT;
+function set(k,v){
+  const e=db[cur]||(db[cur]={});
+  const empty=v==null||v===''||(Array.isArray(v)&&!v.length)||(typeof v==='object'&&!Array.isArray(v)&&!Object.keys(v).length);
+  if(empty)delete e[k];else e[k]=v;
   if(!Object.keys(e).length)delete db[cur];
-  persist();paintSleep();
-  $('saved').textContent='Saved ✓';clearTimeout(save.t);save.t=setTimeout(()=>$('saved').textContent='',1200);
-}
-FIELDS.forEach(k=>$(k).addEventListener('input',save));
-
-// ---------- metrics
-const mins=t=>{if(!t)return null;const[h,m]=t.split(':').map(Number);return h*60+m};
-function sleepMins(e){
-  const b=mins(e.bed),w=mins(e.wake);if(b==null||w==null)return null;
-  let d=w-b;if(d<=0)d+=1440;return d;
-}
-function sleepScore(e){
-  const d=sleepMins(e);if(d==null)return null;
-  const h=d/60;
-  let dur=h>=7&&h<=9?100:h<7?Math.max(0,100-(7-h)*25):Math.max(0,100-(h-9)*25);
-  const parts=[[40,dur]];
-  if(e.latency!==undefined&&e.latency!=='')parts.push([20,Math.max(0,100-Math.max(0,e.latency-15)*3)]);
-  if(e.wakeups!==undefined&&e.wakeups!=='')parts.push([15,Math.max(0,100-e.wakeups*35)]);
-  if(e.wakeFeel)parts.push([25,(e.wakeFeel-1)*25]);
-  const tw=parts.reduce((a,p)=>a+p[0],0);
-  return Math.round(parts.reduce((a,p)=>a+p[0]*p[1],0)/tw);
-}
-const screenH=e=>(e.scrH===undefined&&e.scrM===undefined)||(e.scrH===''&&e.scrM==='')?null:(+e.scrH||0)+(+e.scrM||0)/60;
-const avg=a=>{a=a.filter(x=>x!=null&&!isNaN(x));return a.length?a.reduce((x,y)=>x+y,0)/a.length:null};
-const energy=e=>avg([e.enM,e.enA,e.enE].map(x=>x===''||x==null?null:+x));
-const fmtH=h=>h==null?'–':Math.floor(h)+'h '+String(Math.round((h%1)*60)).padStart(2,'0')+'m';
-
-function paintSleep(){
-  const e=db[cur]||{},d=sleepMins(e),s=sleepScore(e);
-  $('sleepScore').textContent=s==null?'–':s+'/100';
-  $('sleepDetail').textContent=d==null?'Fill bedtime & wake time':'Slept '+fmtH(d/60);
+  persist();refresh();
+  const t=$('#toast');t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),900);
 }
 
-// ---------- nav
-$('date').onchange=()=>{if($('date').value){cur=$('date').value;load()}};
-const shift=n=>{const d=new Date(cur+'T12:00');d.setDate(d.getDate()+n);cur=iso(d);load()};
-$('prev').onclick=()=>shift(-1);$('next').onclick=()=>shift(1);
-
-let mo=today.slice(0,7);
-function tab(m){
-  $('view-day').hidden=m;$('view-month').hidden=!m;
-  $('tab-day').classList.toggle('on',!m);$('tab-month').classList.toggle('on',m);
-  if(m)paintMonth();
+/* ---------- controls ---------- */
+function field(label,ctrl,hint){return h('div',{class:'f'},h('div',{class:'lbl'},label),ctrl,hint&&h('p',{class:'hint'},hint))}
+function chips(k,opts,o={}){
+  const box=h('div',{class:'chips'+(o.sm?' sm':'')});
+  const paint=()=>{const v=E()[k];[...box.children].forEach((b,i)=>{const ov=opts[i].v;const on=o.multi?Array.isArray(v)&&v.includes(ov):v!=null&&String(v)===String(ov);b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)})};
+  opts.forEach(op=>box.append(h('button',{type:'button',class:'chip',onclick(){
+    let v=E()[k];
+    if(o.multi){v=Array.isArray(v)?[...v]:[];const i=v.indexOf(op.v);i<0?v.push(op.v):v.splice(i,1);set(k,v)}
+    else set(k,v!=null&&String(v)===String(op.v)?null:op.v);
+    paint();
+  }},op.l)));
+  paint();return box;
 }
-$('tab-day').onclick=()=>tab(false);$('tab-month').onclick=()=>tab(true);
-$('month').onchange=()=>{if($('month').value){mo=$('month').value;paintMonth()}};
-const mshift=n=>{const[y,m]=mo.split('-').map(Number);const d=new Date(y,m-1+n,1);mo=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');paintMonth()};
-$('mprev').onclick=()=>mshift(-1);$('mnext').onclick=()=>mshift(1);
+const opt=a=>a.map(x=>typeof x==='object'?x:{v:x,l:String(x)});
+function scale(k,labels){
+  const box=h('div',{class:'scale'});
+  const paint=()=>{const v=num(E()[k]);[...box.children].forEach((b,i)=>{b.classList.toggle('on',v===i+1);b.setAttribute('aria-pressed',v===i+1)})};
+  labels.forEach((l,i)=>box.append(h('button',{type:'button',onclick(){set(k,num(E()[k])===i+1?null:i+1);paint()}},h('b',{},String(i+1)),h('span',{},l))));
+  paint();return box;
+}
+function stepper(k,o={}){
+  const step=o.step||1,max=o.max??999;const val=h('div',{class:'sv'});
+  const paint=()=>{const v=num(E()[k]);val.textContent=v==null?'–':(o.fmt?o.fmt(v):v+(o.unit?' '+o.unit:''));val.classList.toggle('empty',v==null)};
+  const bump=d=>{const v=num(E()[k]);let n=v==null?(d>0?step:0):v+d*step;n=Math.max(0,Math.min(max,Math.round(n*10)/10));set(k,n);paint()};
+  const el=h('div',{class:'step'},h('button',{type:'button','aria-label':'Decrease',onclick:()=>bump(-1)},'−'),val,h('button',{type:'button','aria-label':'Increase',onclick:()=>bump(1)},'+'));
+  paint();return el;
+}
+function timeF(k){
+  const inp=h('input',{type:'time',value:E()[k]||'',oninput(){set(k,inp.value)}});
+  return h('div',{class:'tf'},inp,h('button',{type:'button',class:'now',onclick(){inp.value=nowHM();set(k,inp.value)}},'Now'));
+}
+function textF(k,ph,multi){
+  const el=h(multi?'textarea':'input',{placeholder:ph||'',...(multi?{}:{type:'text'})});el.value=E()[k]||'';
+  el.addEventListener('input',()=>set(k,el.value.trim()?el.value:''));return el;
+}
+function numF(k,o={}){
+  const el=h('input',{type:'number',inputmode:o.dec?'decimal':'numeric',min:0,step:o.step||1,placeholder:o.ph||''});
+  el.value=E()[k]??'';el.addEventListener('input',()=>set(k,el.value===''?null:+el.value));return el;
+}
 
-// ---------- month
-function chart(el,pts,n,unit,max){
+/* ---------- log view ---------- */
+let pills={},live={};
+function card(id,...kids){
+  const def=SECTIONS.find(s=>s.id===id);const pill=h('span',{class:'pill'});pills[id]=pill;
+  return h('section',{class:'card',id:'sec-'+id},h('header',{class:'card-h'},h('div',{},h('h2',{},def.t),def.sub&&h('p',{class:'sub'},def.sub)),pill),...kids);
+}
+function suggestions(k){
+  const cnt={};
+  for(const[d,e]of Object.entries(db)){if(d===cur)continue;String(e[k+'_i']||'').split(',').map(s=>s.trim()).filter(Boolean).forEach(s=>{const key=s.toLowerCase();(cnt[key]=cnt[key]||{s,n:0}).n++})}
+  const curItems=String(E()[k+'_i']||'').toLowerCase().split(',').map(s=>s.trim());
+  return Object.values(cnt).filter(o=>!curItems.includes(o.s.toLowerCase())).sort((a,b)=>b.n-a.n).slice(0,6).map(o=>o.s);
+}
+function mealBlock([k,name,ph],open){
+  const d=h('details',{class:'meal'});if(open)d.open=true;
+  const prev=h('span',{class:'mp'}),time=h('span',{class:'mt'});
+  d.append(h('summary',{},h('span',{class:'dot'}),h('span',{class:'mn'},name,prev),time,h('span',{class:'chev'},'›')));
+  const items=textF(k+'_i','What did you eat? e.g. 2 roti, dal, salad');
+  const sug=h('div',{class:'chips sm'});
+  const paintSug=()=>{sug.replaceChildren(...suggestions(k).map(s=>h('button',{type:'button',class:'chip add',onclick(){const v=items.value.trim();items.value=v?v.replace(/,\s*$/,'')+', '+s:s;set(k+'_i',items.value);paintSug()}},'+ '+s)))};
+  items.addEventListener('change',paintSug);
+  const y=db[addDays(cur,-1)]||{};
+  const copy=has(y,k+'_i')&&h('button',{type:'button',class:'linkbtn',onclick(){['_t','_i','_tags'].forEach(s=>set(k+s,Array.isArray(y[k+s])?[...y[k+s]]:y[k+s]));renderLog(k)}},'↺ Same as yesterday');
+  d.append(h('div',{class:'body'},
+    h('div',{class:'row'},h('div',{style:'flex:1;min-width:150px'},timeF(k+'_t')),copy),
+    items,paintSug()||sug,
+    h('div',{},h('div',{class:'lbl'},'Tags'),chips(k+'_tags',opt(FOOD_TAGS),{multi:true,sm:true}))
+  ));
+  live['meal_'+k]=()=>{const e=E();prev.textContent=e[k+'_i']||'Not logged';time.textContent=e[k+'_t']||'';d.classList.toggle('has',has(e,k+'_i'))};
+  return d;
+}
+function renderLog(openMeal){
+  pills={};live={};
+  const root=$('#log');root.replaceChildren();
+  const e=E();
+
+  // sleep
+  const sleepSum=h('div',{class:'summary'});
+  live.sleep=()=>{
+    const e=E(),d=sleepMins(e),s=sleepScore(e);
+    if(d==null){sleepSum.className='summary plain';sleepSum.replaceChildren(h('p',{class:'hint',style:'margin:0'},'Add bedtime and wake-up time to get your sleep score.'));return}
+    sleepSum.className='summary';
+    const diff=d-S.sleepTarget*60, missing=['latency','wakeups','wakeFeel'].filter(k=>!has(e,k)).length;
+    const bedDiff=bedAbs(e)-bedAbs({bed:S.bedTarget});
+    sleepSum.replaceChildren(
+      h('div',{class:'big'},String(s),h('small',{},' /100')),
+      h('div',{},
+        h('div',{class:'k'},'Slept '+fmtDur(d)),
+        h('div',{class:'hint',style:'margin:0'},(diff>=0?'+':'−')+fmtDur(Math.abs(diff))+' vs '+S.sleepTarget+'h goal · bed '+(Math.abs(bedDiff)<5?'on time':fmtDur(Math.abs(bedDiff))+(bedDiff>0?' late':' early'))),
+        missing?h('div',{class:'hint',style:'margin:2px 0 0'},'Fill the '+missing+' remaining sleep question'+(missing>1?'s':'')+' for an accurate score.'):null,
+        d<180||d>780?h('div',{class:'warn'},'That’s '+fmtDur(d)+' — double-check AM/PM on the times.'):null
+      ));
+  };
+  root.append(card('sleep',
+    h('div',{class:'two'},field('Bedtime (last night)',timeF('bed')),field('Woke up',timeF('wake'))),
+    field('Fell asleep in',chips('latency',[{v:5,l:'< 10 min'},{v:15,l:'10–20 min'},{v:30,l:'20–40 min'},{v:50,l:'40+ min'}])),
+    field('Woke up during the night',chips('wakeups',[0,1,2,3,4].map(v=>({v,l:v===0?'None':v===4?'4+':v+'×'})))),
+    field('How did you feel on waking?',scale('wakeFeel',['Exhausted','Tired','Okay','Good','Fresh'])),
+    field('Dreams',chips('dreams',opt(['None','Light','Vivid','Nightmare']))),
+    field('Daytime nap',stepper('nap',{step:10,unit:'min',max:240})),
+    sleepSum));
+
+  // food
+  root.append(card('food',
+    ...MEALS.map(m=>mealBlock(m,openMeal===m[0])),
+    h('div',{class:'two',style:'margin-top:14px'},
+      field('Water',stepper('water',{step:1,max:30,fmt:v=>v+' gl · '+(v*S.glassMl/1000).toFixed(1)+'L'})),
+      field('Tea / coffee',stepper('tea',{unit:'cups',max:15}))),
+    h('div',{class:'two',style:'margin-top:10px'},
+      field('Fruit & veg servings',stepper('fruitveg',{max:20})),
+      field('Junk / sweets',stepper('junk',{unit:'items',max:20}))),
+    h('p',{class:'hint'},'1 glass ≈ '+S.glassMl+' ml. Count coconut water / milk under meals, not water.')));
+
+  // mind
+  const EN=['Very low','Low','Okay','Good','High'];
+  root.append(card('mind',
+    field('Morning energy',scale('enM',EN)),
+    field('Afternoon energy',scale('enA',EN)),
+    field('Evening energy',scale('enE',EN)),
+    field('Overall mood',scale('mood',['Bad','Low','Okay','Good','Great'])),
+    field('Stress',scale('stress',['Calm','Mild','Some','High','Very high'])),
+    field('Focus / productivity',scale('focus',['Scattered','Distracted','Okay','Focused','Deep']))));
+
+  // body
+  root.append(card('body',
+    field('Exercise type',chips('exType',opt(['Walk','Run','Gym','Yoga','Cycling','Sport','Home workout']),{multi:true})),
+    h('div',{class:'two',style:'margin-top:14px'},field('Exercise',stepper('exercise',{step:5,unit:'min',max:600})),field('Steps',numF('steps',{ph:'e.g. 6500'}))),
+    h('div',{class:'two',style:'margin-top:14px'},field('Outdoors / sunlight',stepper('outdoor',{step:10,unit:'min',max:720})),field('Weight (kg)',numF('weight',{dec:true,step:0.1,ph:'weekly is fine'}))),
+    field('Digestion',chips('digestion',opt(['Good','Okay','Bloated','Upset'])))));
+
+  // screen
+  const scrSum=h('div',{class:'summary plain'});
+  live.screen=()=>{
+    const e=E(),t=screenMin(e),g=screenGap(cur),kids=[];
+    if(t!=null)kids.push(h('div',{class:'k'},'Total '+fmtDur(t)+(num(e.social)!=null?' · social '+fmtDur(num(e.social)):'')));
+    if(g!=null)kids.push(h('div',{class:'hint',style:'margin:0'},'Screens off '+fmtDur(g)+' before bed'+(g<30?' — aim for 30+ min':' ✓')));
+    else if(has(e,'lastScreen'))kids.push(h('div',{class:'hint',style:'margin:0'},'Screen-free time before bed appears once tomorrow’s bedtime is logged.'));
+    if(t!=null&&t>18*60)kids.push(h('div',{class:'warn'},'Over 18 hours — check hours vs minutes.'));
+    scrSum.hidden=!kids.length;scrSum.replaceChildren(h('div',{},...kids));
+  };
+  root.append(card('screen',
+    h('div',{class:'two'},field('Hours',numF('scrH',{ph:'0'})),field('Minutes',numF('scrM',{ph:'0'}))),
+    h('div',{class:'two',style:'margin-top:14px'},field('Social media (min)',numF('social',{ph:'optional'})),field('Phone pickups',numF('pickups',{ph:'e.g. 60'}))),
+    field('Last screen before bed',timeF('lastScreen')),
+    scrSum));
+
+  // habits
+  const hb=h('div',{});
+  const paintH=()=>{const done=E().habits||{};hb.replaceChildren(...(S.habits.length?S.habits.map(n=>h('button',{type:'button',class:'hab'+(done[n]?' on':''),'aria-pressed':!!done[n],onclick(){const o={...(E().habits||{})};o[n]?delete o[n]:o[n]=1;set('habits',o);paintH()}},h('span',{class:'box'},'✓'),n)):[h('p',{class:'hint'},'No habits yet — add some in Settings.')]))};
+  paintH();
+  root.append(card('habits',hb,h('button',{type:'button',class:'linkbtn',style:'margin-top:8px',onclick:()=>show('settings')},'Edit habits →')));
+
+  // reflection
+  root.append(card('reflect',
+    field('One win today',textF('win','Small or big — e.g. walked after lunch')),
+    field('Notes',textF('notes','Anything notable: stress, headache, period, travel, late meal…',true))));
+
+  refresh();
+}
+function refresh(){
+  if(view!=='log')return;
+  const e=E();
+  SECTIONS.forEach(s=>{const el=pills[s.id];if(!el)return;
+    if(s.id==='habits'){const n=S.habits.filter(x=>e.habits&&e.habits[x]).length;el.textContent=n+'/'+S.habits.length+' done';el.classList.toggle('full',!!S.habits.length&&n===S.habits.length);return}
+    const c=s.core.filter(k=>has(e,k)).length;el.textContent=c===s.core.length?'✓ Done':c+' of '+s.core.length;el.classList.toggle('full',c===s.core.length)});
+  const p=completion(e);
+  $('#ringVal').setAttribute('stroke-dasharray',(p/100*119.4)+' 200');$('#ringTxt').textContent=p+'%';
+  Object.values(live).forEach(f=>f());
+  paintWeek();
+}
+function paintWeek(){
+  const d=new Date(cur+'T12:00'),mon=addDays(cur,-((d.getDay()+6)%7));
+  $('#week').replaceChildren(...[0,1,2,3,4,5,6].map(i=>{const k=addDays(mon,i),dd=new Date(k+'T12:00');
+    return h('button',{type:'button',class:'wd'+(k===cur?' sel':'')+(k===today?' today':''),disabled:k>today,onclick(){go(k)},'aria-label':dayLabel(k)},
+      dd.toLocaleDateString(undefined,{weekday:'narrow'}),h('span',{class:'n',style:'--p:'+completion(db[k]||{})},h('span',{},String(dd.getDate()))))}));
+}
+function go(k){
+  cur=k;
+  $('#dayTitle').textContent=new Date(k+'T12:00').toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'});
+  const diff=Math.round((new Date(today+'T12:00')-new Date(k+'T12:00'))/864e5);
+  const rel=$('#dayRel');rel.replaceChildren(diff===0?'Today':diff===1?'Yesterday':diff+' days ago');
+  if(diff)rel.append(h('button',{class:'jump',type:'button',onclick:()=>go(today)},'Go to today'));
+  $('#next').disabled=k>=today;
+  renderLog();window.scrollTo({top:0});
+}
+$('#prev').onclick=()=>go(addDays(cur,-1));
+$('#next').onclick=()=>{if(cur<today)go(addDays(cur,1))};
+
+/* ---------- insights ---------- */
+const monthDays=m=>{const[y,mm]=m.split('-').map(Number),n=new Date(y,mm,0).getDate(),out=[];for(let d=1;d<=n;d++){const k=m+'-'+pad(d);if(db[k])out.push({d,k,e:db[k]})}return out};
+const shiftMonth=(m,n)=>{const[y,mm]=m.split('-').map(Number);const d=new Date(y,mm-1+n,1);return d.getFullYear()+'-'+pad(d.getMonth()+1)};
+const monthName=(m,o={month:'long',year:'numeric'})=>new Date(m+'-01T12:00').toLocaleDateString(undefined,o);
+const habitPct=ds=>{if(!ds.length||!S.habits.length)return null;let t=0,d=0;ds.forEach(x=>S.habits.forEach(n=>{t++;if(x.e.habits&&x.e.habits[n])d++}));return d/t*100};
+
+function lineChart(pts,n,o){
   const vals=pts.filter(p=>p.v!=null);
-  if(!vals.length){el.innerHTML='<div class="hint">No data yet.</div>';return}
-  const W=700,H=170,L=34,R=8,T=10,B=22;
-  const hi=max||Math.max(...vals.map(p=>p.v))*1.15||1;
-  const x=d=>L+(d-1)/(Math.max(n,2)-1)*(W-L-R), y=v=>T+(1-v/hi)*(H-T-B);
-  let g='';
-  for(let i=0;i<=3;i++){const v=hi*i/3;g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-5}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--mute)">${Math.round(v*10)/10}</text>`}
-  for(let d=1;d<=n;d+=5)g+=`<text x="${x(d)}" y="${H-6}" text-anchor="middle" font-size="11" fill="var(--mute)">${d}</text>`;
-  const line=vals.map((p,i)=>(i?'L':'M')+x(p.d)+' '+y(p.v)).join(' ');
-  g+=`<path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2"/>`;
-  g+=vals.map(p=>`<circle cx="${x(p.d)}" cy="${y(p.v)}" r="3.5" fill="var(--accent)"><title>Day ${p.d}: ${Math.round(p.v*10)/10}${unit}</title></circle>`).join('');
-  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img">${g}</svg>`;
+  if(!vals.length)return h('div',{class:'empty'},'No data yet');
+  const W=Math.max(280,Math.min(660,$('#view-insights').clientWidth-34)),H=170,L=42,R=8,T=10,B=24;
+  let lo=o.min,hi=o.max;
+  const vs=vals.map(p=>p.v).concat(o.ref!=null?[o.ref]:[]);
+  if(lo==null)lo=Math.min(...vs);if(hi==null)hi=Math.max(...vs);
+  if(o.min==null||o.max==null){const p=(hi-lo)*.15||Math.max(1,Math.abs(hi)*.1);if(o.min==null)lo=Math.max(o.floor??-Infinity,lo-p);if(o.max==null)hi+=p}
+  const x=d=>L+(d-1)/(n-1)*(W-L-R),y=v=>T+(1-(v-lo)/(hi-lo))*(H-T-B);
+  const fmt=o.fmt||(v=>String(Math.round(v*10)/10));
+  let s='';
+  if(o.band)s+=`<rect class="band" x="${L}" width="${W-L-R}" y="${y(Math.min(hi,o.band[1]))}" height="${y(Math.max(lo,o.band[0]))-y(Math.min(hi,o.band[1]))}" rx="4"/>`;
+  let ticks=o.ticks;
+  if(!ticks&&o.tickStep){let st=o.tickStep;lo=Math.floor(lo/st)*st;hi=Math.ceil(hi/st)*st;while((hi-lo)/st>4)st*=2;lo=Math.floor(lo/st)*st;hi=Math.max(lo+st,Math.ceil(hi/st)*st);ticks=[];for(let v=lo;v<=hi+1e-9;v+=st)ticks.push(v)}
+  ticks=ticks||[0,1,2,3].map(i=>lo+(hi-lo)*i/3);
+  ticks.forEach(v=>{s+=`<line class="grid" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text class="ax" x="${L-6}" y="${y(v)+4}" text-anchor="end">${fmt(v)}</text>`});
+  if(o.ref!=null)s+=`<line class="ref" x1="${L}" x2="${W-R}" y1="${y(o.ref)}" y2="${y(o.ref)}"/><text class="ax" x="${W-R}" y="${y(o.ref)-4}" text-anchor="end">goal</text>`;
+  [1,8,15,22,29].filter(d=>d<=n).forEach(d=>{s+=`<text class="ax" x="${x(d)}" y="${H-6}" text-anchor="middle">${d}</text>`});
+  let path='',prev=null;vals.forEach(p=>{path+=(prev!=null&&p.d-prev===1?'L':'M')+x(p.d).toFixed(1)+' '+y(p.v).toFixed(1);prev=p.d});
+  s+=`<path class="ln" d="${path}"/>`;
+  vals.forEach(p=>{s+=`<circle class="hit" cx="${x(p.d)}" cy="${y(p.v)}" r="14" data-tip="${p.tip.replace(/"/g,'&quot;')}" data-k="${p.k}"/><circle class="dot" cx="${x(p.d)}" cy="${y(p.v)}" r="4"/>`});
+  const wrap=h('div',{class:'chart'});wrap.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${o.label||''}">${s}</svg>`;
+  return wrap;
 }
-function paintMonth(){
-  $('month').value=mo;
+const HEAT={
+  score:{l:'Sleep score',f:e=>sleepScore(e),lo:40,hi:100,fmt:v=>Math.round(v)+'/100'},
+  sleep:{l:'Sleep',f:e=>sleepMins(e),lo:300,hi:540,fmt:fmtDur},
+  screen:{l:'Screen time',f:screenMin,lo:0,hi:null,fmt:fmtDur},
+  mood:{l:'Mood',f:e=>num(e.mood),lo:1,hi:5,fmt:v=>v+'/5'},
+  energy:{l:'Energy',f:energy,lo:1,hi:5,fmt:v=>v.toFixed(1)+'/5'},
+  done:{l:'Logged %',f:e=>completion(e),lo:0,hi:100,fmt:v=>v+'%'},
+};
+const LV=[14,32,52,74,100];
+function heatmap(m,days){
+  const cfg=HEAT[heat],[y,mm]=m.split('-').map(Number),n=new Date(y,mm,0).getDate(),off=(new Date(y,mm-1,1).getDay()+6)%7;
+  const byD={};days.forEach(x=>byD[x.d]=x);
+  const vals=days.map(x=>cfg.f(x.e)).filter(v=>v!=null);
+  const lo=cfg.lo,hi=cfg.hi??Math.max(60,...vals);
+  const grid=h('div',{class:'hm'},...['M','T','W','T','F','S','S'].map(d=>h('div',{class:'hd'},d)));
+  for(let i=0;i<off;i++)grid.append(h('div',{class:'hc blank'}));
+  for(let d=1;d<=n;d++){
+    const x=byD[d],k=m+'-'+pad(d),v=x?cfg.f(x.e):null;
+    if(v==null){grid.append(h('button',{type:'button',class:'hc none','data-tip':dayLabel(k)+'\nNot logged',disabled:k>today,onclick:()=>openDay(k)},String(d)));continue}
+    const lv=Math.max(0,Math.min(4,Math.round((v-lo)/(hi-lo)*4)));
+    grid.append(h('button',{type:'button',class:'hc'+(lv>=3?' dk':''),style:'--lv:'+LV[lv]+'%','data-tip':dayLabel(k)+'\n'+cfg.l+': '+cfg.fmt(v),onclick:()=>openDay(k)},String(d)));
+  }
+  return h('div',{},grid,h('div',{class:'legend'},'Less',...LV.map(l=>h('i',{style:'--lv:'+l+'%'})),'More'));
+}
+function findings(days){
+  const out=[],f1=v=>v.toFixed(1);
+  // screens-off gap vs next night's sleep score
+  const g=days.map(x=>({g:screenGap(x.k),s:sleepScore(db[addDays(x.k,1)]||{})})).filter(o=>o.g!=null&&o.s!=null);
+  const ga=g.filter(o=>o.g>=60),gb=g.filter(o=>o.g<60);
+  if(ga.length>=2&&gb.length>=2)out.push(`Nights with screens off 60+ min before bed: sleep score ${Math.round(avg(ga.map(o=>o.s)))} vs ${Math.round(avg(gb.map(o=>o.s)))} otherwise (${ga.length} vs ${gb.length} nights).`);
+  // exercise vs energy
+  const ex=days.filter(x=>num(x.e.exercise)!=null&&energy(x.e)!=null),ea=ex.filter(x=>num(x.e.exercise)>0),eb=ex.filter(x=>num(x.e.exercise)===0);
+  if(ea.length>=2&&eb.length>=2)out.push(`Energy on exercise days ${f1(avg(ea.map(x=>energy(x.e))))}/5 vs ${f1(avg(eb.map(x=>energy(x.e))))}/5 on rest days.`);
+  // sleep >=7h vs mood
+  const sm=days.filter(x=>sleepMins(x.e)!=null&&num(x.e.mood)!=null),sa=sm.filter(x=>sleepMins(x.e)>=420),sb=sm.filter(x=>sleepMins(x.e)<420);
+  if(sa.length>=2&&sb.length>=2)out.push(`Mood after 7h+ sleep ${f1(avg(sa.map(x=>num(x.e.mood))))}/5 vs ${f1(avg(sb.map(x=>num(x.e.mood))))}/5 after less.`);
+  // screen time vs sleep
+  const st=days.map(x=>({t:screenMin(x.e),s:sleepScore(db[addDays(x.k,1)]||{})})).filter(o=>o.t!=null&&o.s!=null);
+  if(st.length>=4){const med=[...st].sort((a,b)=>a.t-b.t)[Math.floor(st.length/2)].t,hi=st.filter(o=>o.t>=med),lo=st.filter(o=>o.t<med);
+    if(hi.length>=2&&lo.length>=2)out.push(`On days with more than ${fmtDur(med)} of screen time, the next night's sleep score was ${Math.round(avg(hi.map(o=>o.s)))} vs ${Math.round(avg(lo.map(o=>o.s)))} on lighter days.`)}
+  // bedtime regularity
+  const bs=sd(days.map(x=>bedAbs(x.e)));if(bs!=null&&days.filter(x=>x.e.bed).length>=5)out.push(`Your bedtime varied by ±${Math.round(bs)} min. Under ±30 min is considered regular.`);
+  // best night
+  const best=days.filter(x=>sleepScore(x.e)!=null).sort((a,b)=>sleepScore(b.e)-sleepScore(a.e))[0];
+  if(best&&days.length>=5)out.push(`Best night: ${dayLabel(best.k)} — slept ${fmtDur(sleepMins(best.e))}, bed at ${best.e.bed}.`);
+  return out;
+}
+function renderInsights(){
+  const root=$('#view-insights');root.replaceChildren();
   const[y,m]=mo.split('-').map(Number),n=new Date(y,m,0).getDate();
-  const days=[];
-  for(let d=1;d<=n;d++){const k=mo+'-'+String(d).padStart(2,'0');if(db[k])days.push({d,k,e:db[k]})}
-  const sl=days.map(x=>({d:x.d,v:sleepMins(x.e)==null?null:sleepMins(x.e)/60}));
-  const sc=days.map(x=>({d:x.d,v:sleepScore(x.e)}));
-  const sr=days.map(x=>({d:x.d,v:screenH(x.e)}));
-  const en=days.map(x=>({d:x.d,v:energy(x.e)}));
-  const A=a=>avg(a.map(p=>p.v));
-  const st=[
-    ['Days logged',days.length+' / '+n],
-    ['Avg sleep',fmtH(A(sl))],
-    ['Avg sleep score',A(sc)==null?'–':Math.round(A(sc))],
-    ['Avg screen time',fmtH(A(sr))],
-    ['Avg energy',A(en)==null?'–':A(en).toFixed(1)+' / 5'],
-    ['Avg mood',avg(days.map(x=>x.e.mood?+x.e.mood:null))==null?'–':avg(days.map(x=>x.e.mood?+x.e.mood:null)).toFixed(1)+' / 5'],
-    ['Avg water',avg(days.map(x=>x.e.water?+x.e.water:null))==null?'–':avg(days.map(x=>x.e.water?+x.e.water:null)).toFixed(1)+' gl'],
-    ['Exercise days',days.filter(x=>+x.e.exercise>0).length],
+  const days=monthDays(mo),prevM=shiftMonth(mo,-1),pdays=monthDays(prevM),pn=monthName(prevM,{month:'short'});
+  root.append(h('div',{class:'card mnav'},
+    h('button',{class:'icon-btn',type:'button','aria-label':'Previous month',onclick(){mo=prevM;renderInsights()}},'‹'),
+    h('h2',{},monthName(mo)),
+    h('button',{class:'icon-btn',type:'button','aria-label':'Next month',disabled:mo>=today.slice(0,7),onclick(){mo=shiftMonth(mo,1);renderInsights()}},'›')));
+  if(!days.length){root.append(h('div',{class:'card empty'},'Nothing logged in '+monthName(mo)+' yet.'));return}
+
+  const bedL=ds=>ds.map(x=>bedAbs(x.e));
+  const T=[
+    {l:'Days logged',f:ds=>ds.length,fmt:v=>v+' / '+n,sub:()=>'avg '+Math.round(avg(days.map(x=>completion(x.e))))+'% complete'},
+    {l:'Avg sleep',f:ds=>avg(ds.map(x=>sleepMins(x.e))),fmt:fmtDur,df:v=>fmtDur(Math.abs(v))},
+    {l:'Sleep score',f:ds=>avg(ds.map(x=>sleepScore(x.e))),fmt:v=>String(Math.round(v)),df:v=>Math.abs(Math.round(v))+' pts'},
+    {l:'Avg bedtime',f:ds=>avg(bedL(ds)),fmt:clock,df:v=>fmtDur(Math.abs(v)),w:['later','earlier']},
+    {l:'Bedtime regularity',f:ds=>sd(bedL(ds)),fmt:v=>'±'+Math.round(v)+' min',df:v=>Math.abs(Math.round(v))+' min',w:['less regular','more regular']},
+    {l:'Screen time',f:ds=>avg(ds.map(x=>screenMin(x.e))),fmt:fmtDur,df:v=>fmtDur(Math.abs(v))},
+    {l:'Energy',f:ds=>avg(ds.map(x=>energy(x.e))),fmt:v=>v.toFixed(1)+' / 5',df:v=>Math.abs(v).toFixed(1)},
+    {l:'Mood',f:ds=>avg(ds.map(x=>num(x.e.mood))),fmt:v=>v.toFixed(1)+' / 5',df:v=>Math.abs(v).toFixed(1)},
+    {l:'Stress',f:ds=>avg(ds.map(x=>num(x.e.stress))),fmt:v=>v.toFixed(1)+' / 5',df:v=>Math.abs(v).toFixed(1)},
+    {l:'Water',f:ds=>avg(ds.map(x=>num(x.e.water))),fmt:v=>v.toFixed(1)+' glasses',df:v=>Math.abs(v).toFixed(1)},
+    {l:'Exercise days',f:ds=>ds.some(x=>has(x.e,'exercise'))?ds.filter(x=>num(x.e.exercise)>0).length:null,fmt:v=>v+' days',df:v=>Math.abs(v)+' days'},
+    {l:'Habits done',f:habitPct,fmt:v=>Math.round(v)+'%',df:v=>Math.abs(Math.round(v))+' pts'},
   ];
-  $('stats').innerHTML=st.map(([a,b])=>`<div class="stat"><b>${b}</b><span>${a}</span></div>`).join('');
-  $('logged').textContent=days.length?'':'Nothing logged this month yet.';
-  chart($('ch-sleep'),sl,n,'h',10);chart($('ch-score'),sc,n,'',100);
-  chart($('ch-screen'),sr,n,'h');chart($('ch-energy'),en,n,'',5);
-  const row=x=>{const e=x.e,d=sleepMins(e);return `<tr><td>${x.d}</td><td>${d==null?'–':fmtH(d/60)}</td><td>${sleepScore(e)??'–'}</td><td>${screenH(e)==null?'–':fmtH(screenH(e))}</td><td>${energy(e)==null?'–':energy(e).toFixed(1)}</td><td>${e.mood||'–'}</td><td>${e.water||'–'}</td><td>${e.exercise||'–'}</td><td><a href="#" data-d="${x.k}">open</a></td></tr>`};
-  $('tbl').innerHTML='<tr><th>Day</th><th>Sleep</th><th>Score</th><th>Screen</th><th>Energy</th><th>Mood</th><th>Water</th><th>Ex min</th><th></th></tr>'+days.map(row).join('');
-  $('tbl').querySelectorAll('a').forEach(a=>a.onclick=ev=>{ev.preventDefault();cur=a.dataset.d;tab(false);load()});
+  const tiles=h('div',{class:'tiles'});
+  T.forEach(t=>{const v=t.f(days);if(v==null)return;const pv=t.df?t.f(pdays):null;let sub=t.sub?t.sub():'';
+    if(pv!=null){const d=v-pv;sub=Math.abs(d)<1e-9?'same as '+pn:(d>0?'↑ ':'↓ ')+t.df(d)+' '+(t.w?(d>0?t.w[0]:t.w[1]):'vs '+pn)}
+    tiles.append(h('div',{class:'tile'},h('span',{class:'tl'},t.l),h('b',{},t.fmt(v)),h('span',{class:'td'},sub||' ')))});
+  root.append(h('section',{class:'card'},h('div',{class:'card-h'},h('div',{},h('h2',{},'Month at a glance'),h('p',{class:'sub'},pdays.length?'Arrows compare with '+monthName(prevM,{month:'long'}):'Next month you’ll see changes vs this month'))),tiles));
+
+  // heatmap
+  const hmBox=h('div',{});
+  const hmChips=h('div',{class:'chips sm',style:'margin-bottom:10px'},...Object.entries(HEAT).map(([k,c])=>h('button',{type:'button',class:'chip'+(k===heat?' on':''),onclick(){heat=k;[...hmChips.children].forEach(b=>b.classList.toggle('on',b===this));hmBox.replaceChildren(heatmap(mo,days))}},c.l)));
+  hmBox.append(heatmap(mo,days));
+  root.append(h('section',{class:'card'},h('h3',{},'Calendar'),h('p',{class:'cap'},'Tap a day to open it.'),hmChips,hmBox));
+
+  // charts
+  const pts=(f,tf)=>days.map(x=>{const v=f(x.e);return{d:x.d,k:x.k,v,tip:v==null?'':dayLabel(x.k)+'\n'+tf(v,x.e)}});
+  const C=(title,cap,el)=>root.append(h('section',{class:'card'},h('h3',{},title),h('p',{class:'cap'},cap),el));
+  C('Sleep duration','Shaded band = healthy 7–9 h. Dashed line = your goal.',lineChart(pts(e=>{const d=sleepMins(e);return d==null?null:d/60},(v,e)=>'Slept '+fmtDur(v*60)+' · score '+sleepScore(e)),n,{min:4,max:10,band:[7,9],ref:S.sleepTarget,fmt:v=>v+'h',ticks:[4,6,8,10],label:'Sleep hours by day'}));
+  C('Bedtime','Higher = later. A flat line means a regular rhythm.',lineChart(pts(bedAbs,v=>'Bed at '+clock(v)),n,{ref:bedAbs({bed:S.bedTarget}),tickStep:30,fmt:clock,label:'Bedtime by day'}));
+  C('Screen time','Total daily screen time from your phone.',lineChart(pts(e=>{const t=screenMin(e);return t==null?null:t/60},(v,e)=>fmtDur(v*60)+(num(e.pickups)!=null?' · '+e.pickups+' pickups':'')),n,{min:0,floor:0,tickStep:1,fmt:v=>Math.round(v*10)/10+'h',label:'Screen time by day'}));
+  C('Energy','Average of morning, afternoon and evening (1–5).',lineChart(pts(energy,v=>'Energy '+v.toFixed(1)+'/5'),n,{min:1,max:5,ticks:[1,2,3,4,5],fmt:v=>String(v),label:'Energy by day'}));
+  C('Mood','Overall mood (1–5).',lineChart(pts(e=>num(e.mood),v=>'Mood '+v+'/5'),n,{min:1,max:5,ticks:[1,2,3,4,5],fmt:v=>String(v),label:'Mood by day'}));
+  C('Water','Glasses per day.',lineChart(pts(e=>num(e.water),v=>v+' glasses'),n,{min:0,floor:0,ref:8,tickStep:2,fmt:v=>String(Math.round(v)),label:'Water by day'}));
+
+  // habits
+  if(S.habits.length){
+    root.append(h('section',{class:'card'},h('h3',{},'Habits'),h('p',{class:'cap'},'Share of logged days each habit was done.'),
+      ...S.habits.map(nm=>{const c=days.filter(x=>x.e.habits&&x.e.habits[nm]).length,p=Math.round(c/days.length*100);
+        return h('div',{class:'hb','data-tip':nm+'\n'+c+' of '+days.length+' days'},h('span',{},nm),h('div',{class:'bar'},h('i',{style:'width:'+p+'%'})),h('b',{},p+'%'))})));
+  }
+
+  // findings
+  const fs=findings(days);
+  root.append(h('section',{class:'card'},h('h3',{},'Patterns'),h('p',{class:'cap'},'Simple comparisons from your own data. They need a couple of weeks of logs to show up.'),
+    fs.length?h('ul',{class:'ins'},...fs.map(t=>h('li',{},t))):h('p',{class:'hint'},'Keep logging. Patterns appear once there are at least 2 days in each group to compare.')));
+
+  // table
+  const tb=h('tbody',{},...days.map(x=>{const e=x.e;return h('tr',{onclick:()=>openDay(x.k)},
+    h('td',{},new Date(x.k+'T12:00').toLocaleDateString(undefined,{weekday:'short',day:'numeric'})),
+    h('td',{},fmtDur(sleepMins(e))),h('td',{},sleepScore(e)??'–'),h('td',{},e.bed||'–'),
+    h('td',{},fmtDur(screenMin(e))),h('td',{},energy(e)==null?'–':energy(e).toFixed(1)),h('td',{},e.mood??'–'),
+    h('td',{},e.water??'–'),h('td',{},e.exercise!=null?e.exercise+'m':'–'),h('td',{},completion(e)+'%'))}));
+  root.append(h('section',{class:'card'},h('h3',{},'All days'),h('p',{class:'cap'},'Tap a row to open or edit that day.'),
+    h('div',{class:'scroll'},h('table',{},h('thead',{},h('tr',{},...['Day','Sleep','Score','Bed','Screen','Energy','Mood','Water','Exercise','Logged'].map(t=>h('th',{},t)))),tb))));
+}
+function openDay(k){if(k>today)return;show('log');go(k)}
+
+/* ---------- settings ---------- */
+function dl(name,text,type){const a=h('a',{href:URL.createObjectURL(new Blob([text],{type})),download:name});document.body.append(a);a.click();a.remove()}
+function exportCSV(){
+  const keys=new Set();Object.values(db).forEach(e=>Object.keys(e).forEach(k=>k!=='habits'&&keys.add(k)));
+  const hab=new Set(S.habits);Object.values(db).forEach(e=>e.habits&&Object.keys(e.habits).forEach(n=>hab.add(n)));
+  const cols=['date','completion','sleepHours','sleepScore','screenMinutes',...[...keys].sort(),...[...hab].map(n=>'habit: '+n)];
+  const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  const rows=Object.keys(db).sort().map(k=>{const e=db[k],d=sleepMins(e);return cols.map(c=>
+    c==='date'?k:c==='completion'?completion(e):c==='sleepHours'?(d==null?'':(d/60).toFixed(2)):c==='sleepScore'?sleepScore(e)??'':c==='screenMinutes'?screenMin(e)??'':
+    c.startsWith('habit: ')?(e.habits&&e.habits[c.slice(7)]?1:0):Array.isArray(e[c])?e[c].join(' | '):e[c]).map(q).join(',')});
+  dl('daily-log-'+today+'.csv',[cols.map(q).join(','),...rows].join('\n'),'text/csv');
+}
+function renderSettings(){
+  const root=$('#view-settings');root.replaceChildren();
+  // habits
+  const list=h('div',{});
+  const paint=()=>list.replaceChildren(...S.habits.map((nm,i)=>h('div',{class:'hrow'},h('span',{},nm),
+    i>0&&h('button',{class:'icon-btn',type:'button','aria-label':'Move up',onclick(){[S.habits[i-1],S.habits[i]]=[S.habits[i],S.habits[i-1]];saveS();paint()}},'↑'),
+    h('button',{class:'icon-btn',type:'button','aria-label':'Remove '+nm,onclick(){S.habits.splice(i,1);saveS();paint()}},'✕'))));
+  paint();
+  const inp=h('input',{type:'text',placeholder:'e.g. Read 10 pages',maxlength:60});
+  const add=()=>{const v=inp.value.trim();if(v&&!S.habits.includes(v)){S.habits.push(v);saveS();inp.value='';paint()}};
+  inp.addEventListener('keydown',ev=>{if(ev.key==='Enter')add()});
+  root.append(h('section',{class:'card'},h('div',{class:'card-h'},h('div',{},h('h2',{},'Habits'),h('p',{class:'sub'},'Your daily checklist. Removing one keeps its history.'))),
+    list,h('div',{class:'tf',style:'margin-top:10px'},inp,h('button',{class:'btn primary',type:'button',onclick:add},'Add'))));
+  // targets
+  const sf=(k,attrs,parse)=>{const el=h('input',attrs);el.value=S[k];el.addEventListener('change',()=>{const v=parse(el.value);if(v!=null&&v!==''){S[k]=v;saveS()}else el.value=S[k]});return el};
+  root.append(h('section',{class:'card'},h('div',{class:'card-h'},h('div',{},h('h2',{},'Goals'),h('p',{class:'sub'},'Used for the goal lines and comparisons.'))),
+    h('div',{class:'two'},field('Sleep goal (hours)',sf('sleepTarget',{type:'number',step:0.5,min:4,max:12,inputmode:'decimal'},v=>v===''?null:Math.min(12,Math.max(4,+v)))),
+      field('Bedtime goal',sf('bedTarget',{type:'time'},v=>v||null))),
+    field('Glass size (ml)',sf('glassMl',{type:'number',step:50,min:50,max:1000,inputmode:'numeric'},v=>v===''?null:Math.max(50,+v)))));
+  // data
+  const file=h('input',{type:'file',accept:'application/json,.json',hidden:true});
+  file.addEventListener('change',async()=>{const f=file.files[0];if(!f)return;
+    try{const o=JSON.parse(await f.text());const entries=o&&o.entries?o.entries:o;if(typeof entries!=='object'||Array.isArray(entries))throw 0;
+      if(o.settings)S=Object.assign(S,o.settings),saveS();db={...db,...entries};persist();alert('Restored '+Object.keys(entries).length+' days.');renderSettings()}
+    catch(e){alert('That file is not a valid Daily Log backup.')}file.value=''});
+  const n=Object.keys(db).length;
+  root.append(h('section',{class:'card'},h('div',{class:'card-h'},h('div',{},h('h2',{},'Your data'),h('p',{class:'sub'},n+' day'+(n===1?'':'s')+' saved in this browser'))),
+    h('div',{class:'prose'},h('p',{},'Everything is stored only on this device, in this browser. It survives refreshes and closing the app, but not clearing site data, private/incognito windows, or switching phone/browser.'),
+      h('p',{},'Tap “Backup” once a week and keep the file (e.g. in Google Drive). “Restore” brings it back on any device.')),
+    h('div',{class:'row',style:'margin-top:10px'},
+      h('button',{class:'btn primary',type:'button',onclick:()=>dl('daily-log-backup-'+today+'.json',JSON.stringify({entries:db,settings:S},null,1),'application/json')},'Backup'),
+      h('button',{class:'btn',type:'button',onclick:()=>file.click()},'Restore'),
+      h('button',{class:'btn',type:'button',onclick:exportCSV},'Export CSV'),file),
+    h('div',{class:'row',style:'margin-top:16px'},h('button',{class:'btn danger',type:'button',onclick(){if(confirm('Delete ALL logged days from this browser? Make a backup first.')&&confirm('Really delete everything? This cannot be undone.')){db={};persist();renderSettings()}}},'Delete all data'))));
+  root.append(h('section',{class:'card prose'},h('h3',{},'How the sleep score works'),
+    h('p',{},'0–100, from: 40% sleep duration (full marks for 7–9 h), 20% time to fall asleep (full marks under 15 min), 15% night wake-ups, 25% how you felt on waking. Missing answers are left out rather than counted as bad.'),
+    h('p',{},'Tip: log sleep right after waking, and screen time just before bed, so you’re recalling, not guessing.')));
 }
 
-// ---------- export / restore
-function dl(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click()}
-$('json').onclick=()=>dl('daily-log-'+today+'.json',JSON.stringify(db,null,1),'application/json');
-$('csv').onclick=()=>{
-  const cols=['date',...FIELDS,'wakeFeel','enM','enA','enE','mood','sleepHours','sleepScore'];
-  const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
-  const rows=Object.keys(db).sort().map(k=>{const e=db[k],d=sleepMins(e);
-    return cols.map(c=>c==='date'?k:c==='sleepHours'?(d==null?'':(d/60).toFixed(2)):c==='sleepScore'?(sleepScore(e)??''):e[c]).map(q).join(',')});
-  dl('daily-log.csv',[cols.join(','),...rows].join('\n'),'text/csv');
-};
-$('restore').onchange=async ev=>{
-  const f=ev.target.files[0];if(!f)return;
-  try{const o=JSON.parse(await f.text());if(typeof o!=='object'||Array.isArray(o))throw 0;
-    db={...db,...o};persist();load();paintMonth();alert('Restored '+Object.keys(o).length+' days.')}
-  catch(e){alert('That file is not a valid backup.')}
-};
+/* ---------- views ---------- */
+function show(v){
+  view=v;['log','insights','settings'].forEach(x=>{$('#view-'+x).hidden=x!==v;$('#nav-'+x).classList.toggle('on',x===v)});
+  $('#tip').hidden=true;
+  if(v==='log')go(cur);else if(v==='insights')renderInsights();else renderSettings();
+  window.scrollTo({top:0});
+}
+$('#nav-log').onclick=()=>show('log');
+$('#nav-insights').onclick=()=>{mo=cur.slice(0,7);show('insights')};
+$('#nav-settings').onclick=()=>show('settings');
+let rz;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(view==='insights')renderInsights()},200)});
 
-load();
+/* ---------- tooltips ---------- */
+const tip=$('#tip');
+function showTip(t){tip.textContent=t.dataset.tip;tip.hidden=false;const r=t.getBoundingClientRect(),tw=tip.offsetWidth,th=tip.offsetHeight;
+  tip.style.left=Math.max(8,Math.min(innerWidth-tw-8,r.left+r.width/2-tw/2))+'px';let top=r.top-th-8;if(top<8)top=r.bottom+8;tip.style.top=top+'px'}
+document.addEventListener('pointerover',ev=>{const t=ev.target.closest&&ev.target.closest('[data-tip]');if(t)showTip(t);else tip.hidden=true});
+document.addEventListener('focusin',ev=>{const t=ev.target.closest&&ev.target.closest('[data-tip]');if(t)showTip(t)});
+window.addEventListener('scroll',()=>{tip.hidden=true},{passive:true});
+
+go(today);
 </script>
 </body>
 </html>
