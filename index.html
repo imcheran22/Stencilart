@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily Log</title>
+<style>
+:root{--bg:#f6f5f1;--card:#fff;--ink:#1d1d1b;--mute:#6b6b66;--line:#e4e2da;--accent:#2f6f5e;--accent-ink:#fff;--warn:#b4572b}
+@media (prefers-color-scheme:dark){:root{--bg:#141413;--card:#1e1e1c;--ink:#ecebe6;--mute:#9a9992;--line:#34332f;--accent:#5fb89f;--accent-ink:#0f1b17;--warn:#e08a5c}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:16px}
+h1{font-size:1.4rem;margin:8px 0 12px}
+h2{font-size:1rem;margin:0 0 10px;color:var(--accent)}
+.tabs{display:flex;gap:8px;margin-bottom:12px}
+.tabs button,.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 14px;border-radius:10px;font:inherit;cursor:pointer}
+.tabs button.on,.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+label{display:block;font-size:.8rem;color:var(--mute);margin-bottom:3px}
+input,select,textarea{width:100%;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+textarea{min-height:64px;resize:vertical}
+.rate{display:flex;gap:6px}
+.rate button{flex:1;padding:9px 0;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit;cursor:pointer}
+.rate button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.hint{font-size:.78rem;color:var(--mute);margin-top:4px}
+.score{font-size:1.8rem;font-weight:700}
+.stat{padding:10px;border:1px solid var(--line);border-radius:10px}
+.stat b{display:block;font-size:1.3rem}
+.stat span{font-size:.78rem;color:var(--mute)}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th,td{padding:6px 4px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+.scroll{overflow-x:auto}
+svg{width:100%;height:auto;display:block}
+.saved{color:var(--accent);font-size:.85rem;min-height:1.2em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Daily Log</h1>
+  <div class="tabs">
+    <button id="tab-day" class="on">Today</button>
+    <button id="tab-month">Month</button>
+  </div>
+
+  <section id="view-day">
+    <div class="card row">
+      <button class="btn" id="prev">‹</button>
+      <input type="date" id="date" style="flex:1;min-width:150px">
+      <button class="btn" id="next">›</button>
+      <span class="saved" id="saved"></span>
+    </div>
+
+    <div class="card">
+      <h2>Sleep</h2>
+      <div class="grid">
+        <div><label>Bedtime (last night)</label><input type="time" id="bed"></div>
+        <div><label>Woke up</label><input type="time" id="wake"></div>
+        <div><label>Minutes to fall asleep</label><input type="number" id="latency" min="0" inputmode="numeric"></div>
+        <div><label>Night wake-ups</label><input type="number" id="wakeups" min="0" inputmode="numeric"></div>
+        <div><label>Dreams</label>
+          <select id="dreams"><option value="">–</option><option>None</option><option>Light</option><option>Vivid</option><option>Nightmare</option></select></div>
+      </div>
+      <div style="margin-top:10px"><label>How did you feel on waking? (1 exhausted – 5 fresh)</label><div class="rate" data-k="wakeFeel"></div></div>
+      <div class="row" style="margin-top:10px">
+        <div><div class="score" id="sleepScore">–</div><div class="hint" id="sleepDetail">Fill bedtime &amp; wake time</div></div>
+      </div>
+      <div class="hint">Sleep score (0–100) = 40% duration (7–9h ideal) + 20% fall-asleep time + 15% night wake-ups + 25% how you felt. Same formula every day, so the monthly trend is comparable.</div>
+    </div>
+
+    <div class="card">
+      <h2>Food &amp; water</h2>
+      <div class="grid" id="meals"></div>
+      <div class="grid" style="margin-top:10px">
+        <div><label>Water (glasses, excl. coconut water)</label><input type="number" id="water" min="0" step="0.5" inputmode="decimal"></div>
+        <div><label>Junk / sugar items</label><input type="number" id="junk" min="0" inputmode="numeric"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Energy &amp; mood (1 low – 5 high)</h2>
+      <div style="margin-bottom:8px"><label>Morning energy</label><div class="rate" data-k="enM"></div></div>
+      <div style="margin-bottom:8px"><label>Afternoon energy</label><div class="rate" data-k="enA"></div></div>
+      <div style="margin-bottom:8px"><label>Evening energy</label><div class="rate" data-k="enE"></div></div>
+      <div><label>Overall mood</label><div class="rate" data-k="mood"></div></div>
+    </div>
+
+    <div class="card">
+      <h2>Body &amp; movement</h2>
+      <div class="grid">
+        <div><label>Exercise (minutes)</label><input type="number" id="exercise" min="0" inputmode="numeric"></div>
+        <div><label>Steps</label><input type="number" id="steps" min="0" inputmode="numeric"></div>
+        <div><label>Weight (kg, optional)</label><input type="number" id="weight" step="0.1" inputmode="decimal"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Screen time (fill at night)</h2>
+      <div class="grid">
+        <div><label>Hours</label><input type="number" id="scrH" min="0" max="24" inputmode="numeric"></div>
+        <div><label>Minutes</label><input type="number" id="scrM" min="0" max="59" inputmode="numeric"></div>
+        <div><label>Phone pickups</label><input type="number" id="pickups" min="0" inputmode="numeric"></div>
+        <div><label>Last screen before bed</label><input type="time" id="lastScreen"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Notes</h2>
+      <textarea id="notes" placeholder="Anything notable: stress, headache, good habit, win of the day…"></textarea>
+    </div>
+  </section>
+
+  <section id="view-month" hidden>
+    <div class="card row">
+      <button class="btn" id="mprev">‹</button>
+      <input type="month" id="month" style="flex:1;min-width:150px">
+      <button class="btn" id="mnext">›</button>
+    </div>
+    <div class="card"><h2>Month summary</h2><div class="grid" id="stats"></div><div class="hint" id="logged"></div></div>
+    <div class="card"><h2>Sleep hours</h2><div id="ch-sleep"></div></div>
+    <div class="card"><h2>Sleep score</h2><div id="ch-score"></div></div>
+    <div class="card"><h2>Screen time (hours)</h2><div id="ch-screen"></div></div>
+    <div class="card"><h2>Energy (avg of day)</h2><div id="ch-energy"></div></div>
+    <div class="card"><h2>Days</h2><div class="scroll"><table id="tbl"></table></div></div>
+    <div class="card row">
+      <button class="btn" id="csv">Export CSV</button>
+      <button class="btn" id="json">Backup JSON</button>
+      <label class="btn" style="margin:0">Restore JSON<input type="file" id="restore" accept="application/json" hidden></label>
+    </div>
+    <div class="hint">Data is saved in this browser only. Use Backup JSON now and then (or before changing phone/browser).</div>
+  </section>
+</div>
+
+<script>
+const KEY='dailylog.v1';
+const $=id=>document.getElementById(id);
+const MEALS=[['breakfast','Breakfast'],['snack','Snack'],['lunch','Lunch'],['snack2','Evening snack'],['dinner','Dinner']];
+const TEXT=['bed','wake','latency','wakeups','dreams','water','junk','exercise','steps','weight','scrH','scrM','pickups','lastScreen','notes'];
+
+let db={};
+try{db=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){db={}}
+const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}};
+const iso=d=>{const z=new Date(d.getTime()-d.getTimezoneOffset()*6e4);return z.toISOString().slice(0,10)};
+const today=iso(new Date());
+
+// Seed today's entry from what was shared on day one
+if(!Object.keys(db).length){
+  db[today]={bed:'23:30',wake:'06:45',dreams:'Light',
+    breakfast_t:'07:15',breakfast_i:'3 roti, tomato/onion dry gravy, 2 boiled eggs, coconut milk 1 glass, coconut water ¾ glass',
+    snack_t:'10:00',snack_i:'Sweet corn ½',
+    lunch_t:'13:30',lunch_i:'3 roti with same gravy, 2 boiled eggs',
+    notes:'Woke up active, slightly tired.'};
+  persist();
+}
+
+let cur=today;
+const entry=()=>db[cur]||(db[cur]={});
+
+// build meal inputs
+$('meals').innerHTML=MEALS.map(([k,n])=>`<div style="grid-column:1/-1"><label>${n}</label><div class="row"><input type="time" id="${k}_t" style="width:120px"><input type="text" id="${k}_i" placeholder="What did you eat?" style="flex:1;min-width:160px"></div></div>`).join('');
+const FIELDS=[...TEXT,...MEALS.flatMap(([k])=>[k+'_t',k+'_i'])];
+
+// rating buttons
+document.querySelectorAll('.rate').forEach(r=>{
+  for(let i=1;i<=5;i++){const b=document.createElement('button');b.textContent=i;b.dataset.v=i;
+    b.onclick=()=>{const e=entry();e[r.dataset.k]=e[r.dataset.k]==i?'':i;save();paintRates()};r.appendChild(b)}
+});
+function paintRates(){
+  const e=db[cur]||{};
+  document.querySelectorAll('.rate').forEach(r=>[...r.children].forEach(b=>b.classList.toggle('on',e[r.dataset.k]==b.dataset.v)));
+}
+
+function load(){
+  const e=db[cur]||{};
+  $('date').value=cur;
+  FIELDS.forEach(k=>$(k).value=e[k]??'');
+  paintRates();paintSleep();
+}
+function save(){
+  const e=entry();
+  FIELDS.forEach(k=>{const v=$(k).value;if(v===''){delete e[k]}else e[k]=v});
+  if(!Object.keys(e).length)delete db[cur];
+  persist();paintSleep();
+  $('saved').textContent='Saved ✓';clearTimeout(save.t);save.t=setTimeout(()=>$('saved').textContent='',1200);
+}
+FIELDS.forEach(k=>$(k).addEventListener('input',save));
+
+// ---------- metrics
+const mins=t=>{if(!t)return null;const[h,m]=t.split(':').map(Number);return h*60+m};
+function sleepMins(e){
+  const b=mins(e.bed),w=mins(e.wake);if(b==null||w==null)return null;
+  let d=w-b;if(d<=0)d+=1440;return d;
+}
+function sleepScore(e){
+  const d=sleepMins(e);if(d==null)return null;
+  const h=d/60;
+  let dur=h>=7&&h<=9?100:h<7?Math.max(0,100-(7-h)*25):Math.max(0,100-(h-9)*25);
+  const parts=[[40,dur]];
+  if(e.latency!==undefined&&e.latency!=='')parts.push([20,Math.max(0,100-Math.max(0,e.latency-15)*3)]);
+  if(e.wakeups!==undefined&&e.wakeups!=='')parts.push([15,Math.max(0,100-e.wakeups*35)]);
+  if(e.wakeFeel)parts.push([25,(e.wakeFeel-1)*25]);
+  const tw=parts.reduce((a,p)=>a+p[0],0);
+  return Math.round(parts.reduce((a,p)=>a+p[0]*p[1],0)/tw);
+}
+const screenH=e=>(e.scrH===undefined&&e.scrM===undefined)||(e.scrH===''&&e.scrM==='')?null:(+e.scrH||0)+(+e.scrM||0)/60;
+const avg=a=>{a=a.filter(x=>x!=null&&!isNaN(x));return a.length?a.reduce((x,y)=>x+y,0)/a.length:null};
+const energy=e=>avg([e.enM,e.enA,e.enE].map(x=>x===''||x==null?null:+x));
+const fmtH=h=>h==null?'–':Math.floor(h)+'h '+String(Math.round((h%1)*60)).padStart(2,'0')+'m';
+
+function paintSleep(){
+  const e=db[cur]||{},d=sleepMins(e),s=sleepScore(e);
+  $('sleepScore').textContent=s==null?'–':s+'/100';
+  $('sleepDetail').textContent=d==null?'Fill bedtime & wake time':'Slept '+fmtH(d/60);
+}
+
+// ---------- nav
+$('date').onchange=()=>{if($('date').value){cur=$('date').value;load()}};
+const shift=n=>{const d=new Date(cur+'T12:00');d.setDate(d.getDate()+n);cur=iso(d);load()};
+$('prev').onclick=()=>shift(-1);$('next').onclick=()=>shift(1);
+
+let mo=today.slice(0,7);
+function tab(m){
+  $('view-day').hidden=m;$('view-month').hidden=!m;
+  $('tab-day').classList.toggle('on',!m);$('tab-month').classList.toggle('on',m);
+  if(m)paintMonth();
+}
+$('tab-day').onclick=()=>tab(false);$('tab-month').onclick=()=>tab(true);
+$('month').onchange=()=>{if($('month').value){mo=$('month').value;paintMonth()}};
+const mshift=n=>{const[y,m]=mo.split('-').map(Number);const d=new Date(y,m-1+n,1);mo=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');paintMonth()};
+$('mprev').onclick=()=>mshift(-1);$('mnext').onclick=()=>mshift(1);
+
+// ---------- month
+function chart(el,pts,n,unit,max){
+  const vals=pts.filter(p=>p.v!=null);
+  if(!vals.length){el.innerHTML='<div class="hint">No data yet.</div>';return}
+  const W=700,H=170,L=34,R=8,T=10,B=22;
+  const hi=max||Math.max(...vals.map(p=>p.v))*1.15||1;
+  const x=d=>L+(d-1)/(Math.max(n,2)-1)*(W-L-R), y=v=>T+(1-v/hi)*(H-T-B);
+  let g='';
+  for(let i=0;i<=3;i++){const v=hi*i/3;g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-5}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--mute)">${Math.round(v*10)/10}</text>`}
+  for(let d=1;d<=n;d+=5)g+=`<text x="${x(d)}" y="${H-6}" text-anchor="middle" font-size="11" fill="var(--mute)">${d}</text>`;
+  const line=vals.map((p,i)=>(i?'L':'M')+x(p.d)+' '+y(p.v)).join(' ');
+  g+=`<path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2"/>`;
+  g+=vals.map(p=>`<circle cx="${x(p.d)}" cy="${y(p.v)}" r="3.5" fill="var(--accent)"><title>Day ${p.d}: ${Math.round(p.v*10)/10}${unit}</title></circle>`).join('');
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img">${g}</svg>`;
+}
+function paintMonth(){
+  $('month').value=mo;
+  const[y,m]=mo.split('-').map(Number),n=new Date(y,m,0).getDate();
+  const days=[];
+  for(let d=1;d<=n;d++){const k=mo+'-'+String(d).padStart(2,'0');if(db[k])days.push({d,k,e:db[k]})}
+  const sl=days.map(x=>({d:x.d,v:sleepMins(x.e)==null?null:sleepMins(x.e)/60}));
+  const sc=days.map(x=>({d:x.d,v:sleepScore(x.e)}));
+  const sr=days.map(x=>({d:x.d,v:screenH(x.e)}));
+  const en=days.map(x=>({d:x.d,v:energy(x.e)}));
+  const A=a=>avg(a.map(p=>p.v));
+  const st=[
+    ['Days logged',days.length+' / '+n],
+    ['Avg sleep',fmtH(A(sl))],
+    ['Avg sleep score',A(sc)==null?'–':Math.round(A(sc))],
+    ['Avg screen time',fmtH(A(sr))],
+    ['Avg energy',A(en)==null?'–':A(en).toFixed(1)+' / 5'],
+    ['Avg mood',avg(days.map(x=>x.e.mood?+x.e.mood:null))==null?'–':avg(days.map(x=>x.e.mood?+x.e.mood:null)).toFixed(1)+' / 5'],
+    ['Avg water',avg(days.map(x=>x.e.water?+x.e.water:null))==null?'–':avg(days.map(x=>x.e.water?+x.e.water:null)).toFixed(1)+' gl'],
+    ['Exercise days',days.filter(x=>+x.e.exercise>0).length],
+  ];
+  $('stats').innerHTML=st.map(([a,b])=>`<div class="stat"><b>${b}</b><span>${a}</span></div>`).join('');
+  $('logged').textContent=days.length?'':'Nothing logged this month yet.';
+  chart($('ch-sleep'),sl,n,'h',10);chart($('ch-score'),sc,n,'',100);
+  chart($('ch-screen'),sr,n,'h');chart($('ch-energy'),en,n,'',5);
+  const row=x=>{const e=x.e,d=sleepMins(e);return `<tr><td>${x.d}</td><td>${d==null?'–':fmtH(d/60)}</td><td>${sleepScore(e)??'–'}</td><td>${screenH(e)==null?'–':fmtH(screenH(e))}</td><td>${energy(e)==null?'–':energy(e).toFixed(1)}</td><td>${e.mood||'–'}</td><td>${e.water||'–'}</td><td>${e.exercise||'–'}</td><td><a href="#" data-d="${x.k}">open</a></td></tr>`};
+  $('tbl').innerHTML='<tr><th>Day</th><th>Sleep</th><th>Score</th><th>Screen</th><th>Energy</th><th>Mood</th><th>Water</th><th>Ex min</th><th></th></tr>'+days.map(row).join('');
+  $('tbl').querySelectorAll('a').forEach(a=>a.onclick=ev=>{ev.preventDefault();cur=a.dataset.d;tab(false);load()});
+}
+
+// ---------- export / restore
+function dl(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click()}
+$('json').onclick=()=>dl('daily-log-'+today+'.json',JSON.stringify(db,null,1),'application/json');
+$('csv').onclick=()=>{
+  const cols=['date',...FIELDS,'wakeFeel','enM','enA','enE','mood','sleepHours','sleepScore'];
+  const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  const rows=Object.keys(db).sort().map(k=>{const e=db[k],d=sleepMins(e);
+    return cols.map(c=>c==='date'?k:c==='sleepHours'?(d==null?'':(d/60).toFixed(2)):c==='sleepScore'?(sleepScore(e)??''):e[c]).map(q).join(',')});
+  dl('daily-log.csv',[cols.join(','),...rows].join('\n'),'text/csv');
+};
+$('restore').onchange=async ev=>{
+  const f=ev.target.files[0];if(!f)return;
+  try{const o=JSON.parse(await f.text());if(typeof o!=='object'||Array.isArray(o))throw 0;
+    db={...db,...o};persist();load();paintMonth();alert('Restored '+Object.keys(o).length+' days.')}
+  catch(e){alert('That file is not a valid backup.')}
+};
+
+load();
+</script>
+</body>
+</html>
